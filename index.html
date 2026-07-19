@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17242E">
+<title>Groundwork — Estate & FM Study</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+:root{
+  --ink:#17242E; --paper:#F2F4F5; --sheet:#FFFFFF; --rule:#D4DADD;
+  --muted:#5B6770; --accent:#1F6FB2;
+  --z-orient:#5B6770; --z-plan:#1F6FB2; --z-fm:#0E8A7B; --z-strata:#C2603D;
+  --z-smart:#6B5CA5; --z-green:#4C8C3B; --z-cap:#B08A2E;
+  --ok:#2E7D46; --warn:#B0452E;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size:16px; line-height:1.5;
+  display:flex; flex-direction:column; overscroll-behavior:none;
+}
+button{font-family:inherit;}
+a{color:var(--accent);}
+.screen{display:none; flex-direction:column; flex:1; min-height:0;}
+.screen.active{display:flex;}
+
+/* ---- title block header ---- */
+header{
+  flex-shrink:0; background:var(--ink); color:#F2F4F5;
+  padding:calc(env(safe-area-inset-top, 0px) + 12px) 16px 10px 16px;
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  border-bottom:3px solid var(--accent);
+}
+header .brand{font-weight:800; letter-spacing:.14em; font-size:15px; text-transform:uppercase;}
+header .sheetlabel{font-size:11px; letter-spacing:.12em; color:#9FB1BC; text-transform:uppercase; white-space:nowrap;}
+header .backbtn{
+  background:none; border:1px solid #3C4E5B; color:#F2F4F5; border-radius:6px;
+  padding:4px 10px; font-size:13px; margin-right:8px;
+}
+header .hleft{display:flex; align-items:center; min-width:0;}
+header .htitle{font-weight:700; font-size:14px; letter-spacing:.04em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+.scroll-area{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; padding-bottom:24px;}
+
+/* ---- home ---- */
+.legend{
+  display:flex; gap:3px; margin:4px 0 6px 0;
+}
+.legend .seg{flex:1; height:14px; border-radius:2px; border:1.5px solid var(--seg-c); background:transparent;}
+.legend .seg.done{background:var(--seg-c);}
+.progress-caption{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:14px;}
+.fumblecard{
+  background:#FBEFE9; border:1px solid #E4C2B2; border-left:5px solid var(--warn);
+  border-radius:8px; padding:12px 14px; margin-bottom:14px;
+}
+.fumblecard .t{font-weight:700; font-size:14px;}
+.fumblecard .d{font-size:13px; color:var(--muted); margin:2px 0 8px 0;}
+.btn{
+  display:inline-block; border:none; border-radius:8px; padding:10px 16px;
+  font-size:14px; font-weight:700; cursor:pointer;
+}
+.btn-ink{background:var(--ink); color:#fff;}
+.btn-ghost{background:transparent; border:1.5px solid var(--ink); color:var(--ink);}
+.btn-warn{background:var(--warn); color:#fff;}
+.btn-ok{background:var(--ok); color:#fff;}
+.btn:active{transform:translateY(1px);}
+.btn[disabled]{opacity:.45;}
+
+.sessionrow{
+  display:flex; background:var(--sheet); border:1px solid var(--rule); border-radius:8px;
+  margin-bottom:10px; overflow:hidden; width:100%; text-align:left; padding:0; cursor:pointer;
+}
+.sessionrow .zbar{width:7px; flex-shrink:0; background:var(--zc);}
+.sessionrow .body{padding:10px 12px; flex:1; min-width:0;}
+.sessionrow .eyebrow{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--zc); font-weight:800;}
+.sessionrow .t{font-weight:700; font-size:15px; line-height:1.3; margin:2px 0;}
+.sessionrow .meta{font-size:12px; color:var(--muted);}
+.sessionrow .status{align-self:center; padding:0 12px; font-size:18px; color:var(--rule); flex-shrink:0;}
+.sessionrow .status.done{color:var(--ok);}
+
+/* ---- session screen ---- */
+.tabs{display:flex; gap:6px; padding:12px 16px 0 16px; flex-shrink:0; background:var(--paper);}
+.tabs button{
+  flex:1; border:1.5px solid var(--rule); background:var(--sheet); border-radius:8px 8px 0 0;
+  padding:8px 4px; font-size:13px; font-weight:700; color:var(--muted); border-bottom:none;
+}
+.tabs button.active{color:var(--ink); border-color:var(--zc); border-bottom:3px solid var(--zc);}
+.whybox{background:var(--sheet); border:1px solid var(--rule); border-left:5px solid var(--zc);
+  border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:14px;}
+.whybox .lbl{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--zc); font-weight:800; margin-bottom:4px;}
+.item{
+  background:var(--sheet); border:1px solid var(--rule); border-radius:8px;
+  padding:10px 12px; margin-bottom:9px; display:flex; gap:10px; align-items:flex-start;
+}
+.item .box{
+  width:22px; height:22px; border:2px solid var(--rule); border-radius:5px; flex-shrink:0;
+  margin-top:2px; display:flex; align-items:center; justify-content:center;
+  font-size:14px; color:#fff; background:transparent; cursor:pointer; padding:0;
+}
+.item.checked .box{background:var(--zc); border-color:var(--zc);}
+.item .txt{flex:1; min-width:0;}
+.item .t{font-weight:700; font-size:14px; line-height:1.35;}
+.item.checked .t{color:var(--muted);}
+.item .d{font-size:13px; color:var(--muted); margin-top:2px;}
+.item .d a{word-break:break-all;}
+.sectionlbl{font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); font-weight:800; margin:16px 0 8px 0;}
+
+/* sticky footer (M9) */
+.footerbar{
+  flex-shrink:0; background:var(--sheet); border-top:1px solid var(--rule);
+  padding:10px 16px calc(env(safe-area-inset-bottom, 0px) + 10px) 16px;
+  display:flex; gap:10px;
+}
+.footerbar .btn{flex:1; text-align:center;}
+
+/* ---- timer ---- */
+.timerbox{
+  background:var(--ink); color:#F2F4F5; border-radius:10px; padding:14px;
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;
+}
+.timerbox .time{font-size:34px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:.04em;}
+.timerbox .lbl{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#9FB1BC;}
+.timerbox.zero .time{color:#F0B429;}
+.timerbox .tbtns{display:flex; gap:8px;}
+.timerbox .tbtns button{
+  background:transparent; border:1.5px solid #3C4E5B; color:#F2F4F5;
+  border-radius:8px; padding:8px 14px; font-size:13px; font-weight:700;
+}
+
+/* ---- flashcards ---- */
+.cardcount{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px;}
+.flashcard{
+  background:var(--sheet); border:1px solid var(--rule); border-top:5px solid var(--zc);
+  border-radius:10px; padding:18px 16px; min-height:150px;
+}
+.flashcard .q{font-weight:700; font-size:16px; line-height:1.45;}
+.flashcard .a{margin-top:14px; padding-top:12px; border-top:1px dashed var(--rule); font-size:14.5px; color:#2C3E4A;}
+.flashrow{display:flex; gap:10px; margin-top:14px;}
+.flashrow .btn{flex:1;}
+.reviewdone{
+  background:var(--sheet); border:1px solid var(--rule); border-radius:10px; padding:18px 16px; text-align:center;
+}
+.reviewdone .big{font-size:34px; font-weight:800;}
+.reviewdone .sub{color:var(--muted); font-size:14px; margin-bottom:12px;}
+.empty{color:var(--muted); text-align:center; padding:40px 16px; font-size:14px;}
+
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important;} }
+button:focus-visible, a:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <header>
+    <span class="brand">Groundwork</span>
+    <span class="sheetlabel">Estate · FM · Strata · Planning</span>
+  </header>
+  <div class="scroll-area" id="home-scroll"></div>
+</div>
+
+<!-- SESSION -->
+<div class="screen" id="screen-session">
+  <header>
+    <span class="hleft">
+      <button class="backbtn" onclick="goHome()">&#8592;</button>
+      <span class="htitle" id="sess-title"></span>
+    </span>
+    <span class="sheetlabel" id="sess-sheet"></span>
+  </header>
+  <div class="tabs" id="sess-tabs">
+    <button id="tab-learn" onclick="setTab('learn')">Learn</button>
+    <button id="tab-res" onclick="setTab('res')">Resources</button>
+    <button id="tab-review" onclick="setTab('review')">Review</button>
+  </div>
+  <div class="scroll-area" id="sess-scroll"></div>
+  <div class="footerbar">
+    <button class="btn btn-ghost" id="btn-done" onclick="toggleDone()"></button>
+  </div>
+</div>
+
+<script>
+// M3: register the service worker first, before anything else can throw.
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+
+// M6: Singapore-safe local date string.
+function localDateStr(d = new Date()) {
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function today(){ return localDateStr(new Date()); }
+
+/* ================= CONTENT ================= */
+const TRACKS = {
+  orient:{c:"var(--z-orient)", name:"Orientation"},
+  plan:{c:"var(--z-plan)", name:"Master Planning"},
+  fm:{c:"var(--z-fm)", name:"Facilities Mgmt"},
+  strata:{c:"var(--z-strata)", name:"Strata"},
+  smart:{c:"var(--z-smart)", name:"Smart FM"},
+  green:{c:"var(--z-green)", name:"Sustainability"},
+  cap:{c:"var(--z-cap)", name:"Capstone"}
+};
+
+const SESSIONS = [
+{ id:"s1", num:1, track:"orient", title:"The SG Built Environment Map",
+  why:"80% of confusion in this field comes from mixing up institutions and mixing up three overlapping terms: asset management (portfolio and financial view), property management (tenancy, leases, revenue) and facilities management (operations, services, maintenance). Fix the map first and every later session has somewhere to hang.",
+  concepts:[
+    {t:"The lifecycle chain", d:"Land is planned (URA Master Plan) \u2192 developed into estates and buildings \u2192 owned and governed (strata via BMSMA/MCST, or public via HDB, town councils, agencies) \u2192 operated and maintained (FM) \u2192 renewed or redeveloped (upgrading, en bloc, rezoning). Every topic sits somewhere on this chain."},
+    {t:"Who does what", d:"URA plans land use. SLA manages state land. BCA regulates buildings and drives FM standards. HDB and JTC are the big public developers and landlords. Town councils manage HDB common property. MCSTs govern private strata. NEA, SCDF and PUB own the operating licences and codes."},
+    {t:"Asset vs property vs facilities management", d:"Asset mgmt: is this building worth holding, and what capex does it need? Property mgmt: who leases it, at what rent, on what terms? FM: is it clean, safe, running and maintained today? Same building, three lenses."},
+    {t:"Real Estate ITM direction", d:"The Industry Transformation Map is pushing FM toward outcome-based contracts, aggregation of buildings under one contract, and Smart FM technology. This one policy thrust explains most of what BCA publishes."}
+  ],
+  resources:[
+    {t:"Real Estate ITM \u2014 FM sections", d:"Skim the official framing on the MND / BCA sites.", url:"https://www.bca.gov.sg"},
+    {t:"Atkin & Brooks, Total Facility Management, Ch. 1\u20132", d:"Your reference textbook for Sessions 4\u20135 too. Free e-copy via NLB."},
+    {t:"Draw your one-page map", d:"Agencies placed on the lifecycle chain. This diagram is your review anchor for all 10 sessions."}
+  ],
+  review:[
+    {q:"Recite the lifecycle chain of the built environment, end to end.", a:"Plan (URA Master Plan) \u2192 develop (GLS, developers) \u2192 own and govern (MCST / town council / agency) \u2192 operate and maintain (FM) \u2192 renew (upgrading, en bloc, rezoning)."},
+    {q:"Asset vs property vs facilities management \u2014 one line each.", a:"Asset = portfolio and financial value view. Property = tenancy, leases, revenue. FM = daily operations, services and maintenance."},
+    {q:"Who regulates buildings and FM standards? Who plans land use? Who manages state land?", a:"BCA regulates buildings and FM standards. URA plans land use. SLA manages state land."},
+    {q:"What do town councils manage, and under which law?", a:"Common property of HDB estates, under the Town Councils Act \u2014 the public-sector parallel to an MCST."}
+  ]},
+
+{ id:"s2", num:2, track:"plan", title:"Master Planning I: The Statutory Hierarchy",
+  why:"The Master Plan is the legal answer to what can be built where. Two attributes \u2014 zoning and Gross Plot Ratio \u2014 carry most of the meaning. Master Plan 2025 was gazetted on 1 Dec 2025, so you are learning the current plan.",
+  concepts:[
+    {t:"The planning hierarchy", d:"Long-Term Plan (50-year, non-statutory) \u2192 Master Plan (statutory, 10\u201315 year horizon, full revision roughly every 5 years) \u2192 detailed control plans and guidelines. MP2025 gazetted 1 Dec 2025 after URA's largest-ever public engagement."},
+    {t:"Planning Act and gazetting", d:"The Planning Act is the legal basis. Gazetting formally adopts the plan as Singapore's statutory land use plan \u2014 it stops being a draft and starts binding development control decisions."},
+    {t:"Zoning + GPR: the two attributes every plot carries", d:"Zone sets permitted use (residential, commercial, business park, white...). GPR sets intensity: GPR \u00d7 land area = maximum gross floor area. Height controls are a separate constraint \u2014 a development must satisfy both."},
+    {t:"White Sites, rezoning and value", d:"White zones allow flexible mixed use. When URA rezones or raises GPR, land value moves because more (or higher-value) development becomes possible on the same footprint."}
+  ],
+  resources:[
+    {t:"URA Master Plan portal", d:"Read the MP2025 key thrusts and press release.", url:"https://www.ura.gov.sg/land-planning/master-plan/"},
+    {t:"URA SPACE interactive map", d:"Look up 5 sites you know: home, office, a mall, an industrial estate, a reserve site. Read zone, GPR, height.", url:"https://www.ura.gov.sg/maps/"},
+    {t:"CLC Urban Systems Studies: Land Framework of Singapore", d:"The single best explainer of how planning, land sales and development connect. Free PDF.", url:"https://www.clc.gov.sg"}
+  ],
+  review:[
+    {q:"State the planning hierarchy and which layer is statutory.", a:"Long-Term Plan (50-yr, non-statutory) \u2192 Master Plan (statutory, 10\u201315 yr, revised ~5-yearly; MP2025 gazetted 1 Dec 2025) \u2192 detailed control plans and guidelines."},
+    {q:"What two attributes does every plot carry, and what does GPR determine?", a:"Land use zone and Gross Plot Ratio. GPR \u00d7 land area = maximum GFA. Height limits are a separate, additional constraint."},
+    {q:"What legal instrument underpins the Master Plan and what does gazetting do?", a:"The Planning Act. Gazetting adopts the plan as the official statutory land use plan that binds development control."},
+    {q:"Why does a GPR uplift or rezoning move land value?", a:"More development, or higher-value use, becomes possible on the same land \u2014 the development potential rises even before anything is built."}
+  ]},
+
+{ id:"s3", num:3, track:"plan", title:"Master Planning II: From Plan to Estate",
+  why:"A gazetted zone is just ink until land is sold, built and handed over. This session traces plan \u2192 GLS \u2192 development \u2192 TOP/CSC/DLP \u2192 managed estate \u2014 the milestones where estate management and FM careers actually begin.",
+  concepts:[
+    {t:"Government Land Sales (GLS)", d:"How the Master Plan becomes development. Confirmed List sites are released on schedule regardless of demand; Reserve List sites are triggered only when a developer commits a minimum acceptable bid."},
+    {t:"Development control in one paragraph", d:"Developments need Written Permission from URA. Where planning parameters are enhanced, a Land Betterment Charge captures part of the uplift. Enough depth: know the terms and the logic."},
+    {t:"TOP \u2192 CSC \u2192 DLP: the handover milestones", d:"TOP (Temporary Occupation Permit) lets people occupy once key requirements are met. CSC (Certificate of Statutory Completion) certifies full compliance. DLP (Defects Liability Period, typically 12 months) is when the contractor must fix defects \u2014 and when FM and MCST duties begin."},
+    {t:"District-scale estate management", d:"one-north, Punggol Digital District and Jurong Lake District show how the Master Plan is operationalised at precinct scale \u2014 the meeting point of master planning and estate management."}
+  ],
+  resources:[
+    {t:"URA GLS programme page", d:"Read the current half-year programme; note Confirmed vs Reserve sites.", url:"https://www.ura.gov.sg"},
+    {t:"JTC estate pages: one-north or Punggol Digital District", d:"Read how an estate manager role is framed at district scale.", url:"https://www.jtc.gov.sg"},
+    {t:"CLC district case study", d:"Pick one Urban Systems Study, e.g. Jurong Lake District.", url:"https://www.clc.gov.sg"}
+  ],
+  review:[
+    {q:"Confirmed List vs Reserve List in the GLS programme?", a:"Confirmed: released on schedule regardless of demand. Reserve: released only when a developer commits a minimum acceptable bid."},
+    {q:"TOP vs CSC \u2014 what does each certify?", a:"TOP allows occupation once key requirements are met; CSC certifies full statutory completion. TOP first, CSC later."},
+    {q:"What is the DLP and why does it matter to FM and MCSTs?", a:"Defects Liability Period, typically 12 months, when the contractor must rectify defects \u2014 it is the window where the new MCST/FM team must find and log defects before they become their own cost."},
+    {q:"Narrate the full journey of a plot from gazette to managed estate.", a:"Gazetted zone + GPR \u2192 GLS tender \u2192 Written Permission and development \u2192 TOP \u2192 CSC \u2192 DLP \u2192 handover to MCST / estate and FM team."}
+  ]},
+
+{ id:"s4", num:4, track:"fm", title:"FMM I: Maintenance Strategy",
+  why:"The four maintenance strategies answer 80% of maintenance questions, and the statutory regimes (lifts, fire, facade) are non-negotiable table stakes in any SG FM conversation.",
+  concepts:[
+    {t:"Hard FM vs soft FM", d:"Hard: the building's M&E and fabric \u2014 ACMV, lifts, fire protection, electrical, plumbing, facade. Soft: services to occupants \u2014 cleaning, security, landscaping, pest control, waste."},
+    {t:"The four maintenance strategies", d:"Corrective (run-to-fail; cheap assets), preventive (time-based; the workhorse), condition-based (act on inspection or sensor readings), predictive (analytics forecast failure). Choosing rationally per asset is the core skill."},
+    {t:"Statutory maintenance in SG", d:"Lift maintenance regime and registration, annual Fire Certificate, cooling tower and water tank requirements \u2014 and Periodic Facade Inspection: every 7 years for buildings over 13m and over 20 years old."},
+    {t:"ISO 41001", d:"The FM management-system standard. Know that it exists, that it follows plan-do-check-act logic, and that agencies increasingly reference it in tenders. You do not need the clauses."}
+  ],
+  resources:[
+    {t:"Atkin & Brooks \u2014 service delivery and maintenance chapters", d:"The conceptual backbone for this session."},
+    {t:"BCA Periodic Facade Inspection guide", d:"Free on the BCA site; skim the regime and duties.", url:"https://www.bca.gov.sg"},
+    {t:"SCDF Fire Certificate requirements", d:"Skim only \u2014 know the obligation exists and who holds it.", url:"https://www.scdf.gov.sg"}
+  ],
+  review:[
+    {q:"Name the four maintenance strategies and one asset each is right for.", a:"Corrective (light fittings), preventive (lifts \u2014 also statutory), condition-based (facade, switchgear via inspection/sensors), predictive (chillers with analytics)."},
+    {q:"Hard FM vs soft FM \u2014 give three examples each.", a:"Hard: ACMV, lifts, fire protection, electrical, facade. Soft: cleaning, security, landscaping, pest, waste."},
+    {q:"State the Periodic Facade Inspection rule.", a:"Every 7 years, for buildings taller than 13m and older than 20 years."},
+    {q:"What is ISO 41001?", a:"The international FM management-system standard, built on plan-do-check-act \u2014 increasingly referenced in SG tenders."}
+  ]},
+
+{ id:"s5", num:5, track:"fm", title:"FMM II: Economics, Contracts & KPIs",
+  why:"FM contracting is fundamentally a process-and-measurement problem \u2014 exactly your Lean Six Sigma home ground. Input vs outcome-based contracting is the single most important FM procurement concept in SG right now.",
+  concepts:[
+    {t:"Life-cycle costing", d:"Capex vs opex, and the punchline: design decisions lock in roughly 80% of a building's operating cost. This is why Design for Maintainability (Session 8) is now a procurement issue, not an afterthought."},
+    {t:"Contracting models", d:"In-house vs outsourced; single-service vs bundled vs Integrated FM (IFM). The trend: fewer, bigger, smarter contracts across aggregated portfolios."},
+    {t:"Input vs output/outcome-based contracts", d:"Input: you specify headcount and frequency (wipe tables 3x daily). Outcome: you specify the standard (tables clean to X, verified by inspection or sensors) and let the contractor optimise. BCA is actively pushing outcome-based."},
+    {t:"SLAs, KPIs and the principal-agent problem", d:"The contractor knows more than the client. The fix is measurable KPIs, performance regimes with service credits or deductions, and audit. Sinking-fund logic plans the long cycles: repainting, lifts ~15\u201320 yrs, chillers ~15 yrs."}
+  ],
+  resources:[
+    {t:"BCA Guide to Output-Based FM Contracts", d:"The anchor read \u2014 short, free, central. Read it properly.", url:"https://www.bca.gov.sg"},
+    {t:"One real FM tender on GeBIZ", d:"Read one actual spec end to end \u2014 you already have the tooling for this."},
+    {t:"Atkin & Brooks \u2014 outsourcing and performance chapters", d:"Frameworks for the contracting models above."}
+  ],
+  review:[
+    {q:"Input-based vs outcome-based FM contracts \u2014 explain to an MCST council in two sentences.", a:"Input pays for effort (people, frequencies); outcome pays for results against measurable standards, with deductions when standards are missed. Outcome-based transfers optimisation to the contractor \u2014 but only works if the KPIs are genuinely measurable."},
+    {q:"Why does design lock in operating cost, and what practice responds to it?", a:"Roughly 80% of lifecycle cost is fixed at design; Design for Maintainability pushes maintenance thinking upstream into design and procurement."},
+    {q:"What does the sinking fund exist to smooth, with two example cycles?", a:"Large cyclical capital works \u2014 e.g. lift replacement at ~15\u201320 years, chiller replacement at ~15 years, plus repainting cycles."},
+    {q:"Name the principal-agent problem in FM and its three standard mitigations.", a:"The contractor knows the true condition and effort better than the client; mitigate with measurable KPIs, a performance/payment regime, and independent audit or inspection."}
+  ]},
+
+{ id:"s6", num:6, track:"strata", title:"Strata I: BMSMA, MCST & Governance",
+  why:"The BMSMA is the constitution of strata living. Master the entities (MCST, council, managing agent), share value, and the common property boundary, and most strata questions become mechanical.",
+  concepts:[
+    {t:"The legal frame", d:"Building Maintenance and Strata Management Act (BMSMA) governs management and maintenance; the Land Titles (Strata) Act governs title and subdivision. BCA administers the BMSMA."},
+    {t:"The entities", d:"Developer \u2192 first AGM \u2192 MCST (a body corporate of all subsidiary proprietors, the legal duty-holder) \u2192 council (elected, directs) \u2192 managing agent (appointed, executes). Duties sit with the MCST even when work is delegated."},
+    {t:"Share value: the master key", d:"Each lot's share value drives three things: maintenance contributions, voting rights at general meetings, and en bloc consent thresholds."},
+    {t:"Common property and by-laws", d:"Common property = not comprised in any lot and used or enjoyed by occupiers generally \u2014 the boundary question (windows, facade, inter-floor structures) behind most disputes. Prescribed by-laws apply by default; additional by-laws need a special resolution. Know the resolution ladder: ordinary (simple majority), special (75%), 90% resolution \u2014 e.g. exclusive use of common property for 1 year / 3 years / longer respectively."}
+  ],
+  resources:[
+    {t:"BCA \u2018Strata Living in Singapore \u2014 A General Guide\u2019", d:"The single highest-value document for this whole topic. Read cover to cover (it is short).", url:"https://www.bca.gov.sg"},
+    {t:"BMSMA on Singapore Statutes Online", d:"Use as a lookup, not a linear read: MCST duties (s.29), share value provisions, Second Schedule (meetings).", url:"https://sso.agc.gov.sg"},
+    {t:"BCA strata management FAQs", d:"Quick answers to the classic questions.", url:"https://www.bca.gov.sg"}
+  ],
+  review:[
+    {q:"What is the MCST and what is its relationship to the council and managing agent?", a:"A body corporate of all subsidiary proprietors, created on strata subdivision; it holds the legal duties. The elected council directs; the appointed managing agent executes \u2014 delegation never moves the duty."},
+    {q:"Share value determines which three things?", a:"Maintenance contributions, voting power, and en bloc consent thresholds."},
+    {q:"Define common property and name two classic boundary disputes.", a:"Property not comprised in any lot, used or enjoyed by occupiers generally. Classic fights: windows/facade elements, and inter-floor slabs and pipes."},
+    {q:"Match the resolution types to exclusive-use durations of common property.", a:"Ordinary resolution: up to 1 year. Special resolution (75%): up to 3 years. 90% resolution: beyond 3 years."}
+  ]},
+
+{ id:"s7", num:7, track:"strata", title:"Strata II: Money, Disputes & En Bloc",
+  why:"Money and disputes are where strata theory gets real: two funds, one dispute ladder, and the two en bloc thresholds every SG property conversation eventually reaches.",
+  concepts:[
+    {t:"Management fund vs sinking fund", d:"Management fund pays routine, recurrent expenses; sinking fund pays capital and cyclical works. Contributions are set at AGM \u2014 and chronic sinking-fund under-provision is the defining problem of older MCSTs."},
+    {t:"Managing agents", d:"Most MCSTs appoint an MA to run daily operations. Watch the professionalisation and licensing push for MAs \u2014 a live policy topic."},
+    {t:"Disputes and the s.101 presumption", d:"Ladder: internal \u2192 mediation \u2192 Strata Titles Boards (STB) \u2192 courts. For inter-floor leaks, s.101 presumes the defect originates from the unit above unless rebutted \u2014 the most cited section in strata life."},
+    {t:"Collective sale (en bloc)", d:"Consent threshold by share value AND strata area: at least 80% if the development is 10 years or older, 90% if younger. Collective sale committee runs the process; STB/High Court approval applies a good-faith test on the transaction. Public parallel: town councils face the same fund-and-maintenance problems under a different statute."}
+  ],
+  resources:[
+    {t:"BCA Strata Living guide \u2014 finance and dispute chapters", d:"Continue from Session 6."},
+    {t:"STB website case summaries", d:"Read 2\u20133 published outcomes to see how disputes actually resolve.", url:"https://www.stratatb.gov.sg"},
+    {t:"One recent en bloc news piece", d:"Trace a live/recent attempt against the statutory steps (ST or EdgeProp)."},
+    {t:"MND Town Council Management Report", d:"Skim the indicators \u2014 note how maintenance performance is publicly measured.", url:"https://www.mnd.gov.sg"}
+  ],
+  review:[
+    {q:"Management fund vs sinking fund \u2014 what may each pay for?", a:"Management fund: routine, recurrent operating expenses. Sinking fund: capital, cyclical and major works (repainting, lift replacement)."},
+    {q:"A resident reports a ceiling leak from above. Walk the path.", a:"s.101 presumes the defect comes from the unit above unless rebutted; determine lot vs common property responsibility; attempt internal resolution/mediation; escalate to STB, then courts if needed."},
+    {q:"State the two en bloc consent thresholds precisely.", a:"At least 80% by share value AND strata area if the development is 10+ years old; at least 90% if under 10 years."},
+    {q:"What is the public-sector parallel to the MCST's fund problem?", a:"Town councils under the Town Councils Act: S&CC as contributions, mandated sinking funds, and the same long-cycle works pressure \u2014 measured publicly in the Town Council Management Report."}
+  ]},
+
+{ id:"s8", num:8, track:"smart", title:"Smart FM & Design for Maintainability",
+  why:"Smart FM is a data pipeline, and DfM is the upstream fix. Together they are where FM meets your process-redesign world \u2014 a work order is just a process waiting for a value-stream map.",
+  concepts:[
+    {t:"Design for Maintainability (DfM)", d:"Shift maintenance thinking into design: access for cleaning and replacement, durable materials, standardised parts. BCA publishes DfM guides and it is now a procurement criterion \u2014 because design locks in ~80% of lifecycle cost."},
+    {t:"The Smart FM stack", d:"Sensors/IoT \u2192 CMMS/IWMS (the system of record: asset register, PM scheduling, work orders, fault reporting) \u2192 dashboards and analytics \u2192 predictive maintenance. Know concretely what a CMMS does."},
+    {t:"BIM to digital twin", d:"As-built BIM data handed over at TOP (COBie is the standard data format in one sentence) seeds the operational digital twin. Data handover quality is the make-or-break for Smart FM \u2014 no data, no twin."},
+    {t:"Aggregation and remote monitoring", d:"Portfolios of buildings run from one command centre \u2014 the direction of travel for agencies and large FM firms, and the reason outcome-based contracting and Smart FM arrive together."}
+  ],
+  resources:[
+    {t:"BCA Guide to Smart FM", d:"The anchor read for this session. Free PDF.", url:"https://www.bca.gov.sg"},
+    {t:"BCA Design for Maintainability guides", d:"Read the overview guide; note it is versioned by building type.", url:"https://www.bca.gov.sg"},
+    {t:"One vendor-neutral CMMS explainer", d:"IFMA or IWFM article \u2014 just enough to describe modules confidently."},
+    {t:"Stretch: value-stream map a work order", d:"Fault report \u2192 triage \u2192 assignment \u2192 rectification \u2192 closure. Spot the waste. Your BPR lens, applied to FM."}
+  ],
+  review:[
+    {q:"Trace a chiller fault through a Smart FM setup.", a:"Sensor detects anomaly \u2192 CMMS auto-raises a work order \u2192 technician assigned and rectifies \u2192 closure data logged \u2192 history feeds the predictive model that catches the next one earlier."},
+    {q:"What does a CMMS concretely do? Four functions.", a:"Asset register, preventive maintenance scheduling, work order management, fault reporting with history."},
+    {q:"Why is data handover at TOP make-or-break for Smart FM?", a:"The as-built BIM/COBie data seeds the asset register and digital twin; without clean handover data, every downstream Smart FM capability starves."},
+    {q:"Name two design decisions DfM would change to cut lifetime cost.", a:"Examples: locate plant and fittings for safe access without scaffolding; standardise components for cheaper replacement; specify durable, cleanable facade materials."}
+  ]},
+
+{ id:"s9", num:9, track:"green", title:"Sustainability, Green Mark & Energy",
+  why:"Energy is where sustainability, regulation and money meet. ACMV is typically 50\u201360% of a commercial building's energy, so the chiller plant is the highest-leverage lever an FM team owns.",
+  concepts:[
+    {t:"Why energy dominates", d:"In commercial buildings ACMV is typically ~50\u201360% of consumption. Chiller plant efficiency is therefore the biggest single FM lever on both cost and carbon."},
+    {t:"Green Mark", d:"BCA's certification scheme (current: Green Mark 2021), with Platinum and Super Low Energy tiers. Tenants and agencies increasingly demand it; it certifies design and operational performance."},
+    {t:"The regulatory ratchet", d:"Annual building energy submission to BCA, mandatory energy audits, and the Mandatory Energy Improvement (MEI) regime for poor-performing buildings. Poor energy performance is now a compliance exposure, not just a cost."},
+    {t:"80-80-80 in 2030", d:"Singapore Green Building Masterplan targets: 80% of buildings green by GFA, 80% of new developments Super Low Energy, 80% improvement in energy efficiency for best-in-class buildings. Plus one pass on water (PUB Water Efficient Building), waste, and indoor environmental quality."}
+  ],
+  resources:[
+    {t:"Singapore Green Building Masterplan pages", d:"The 80-80-80 framing, from the source.", url:"https://www.bca.gov.sg"},
+    {t:"Green Mark 2021 overview", d:"Criteria summary only \u2014 not the full technical guide.", url:"https://www.bca.gov.sg"},
+    {t:"BCA pages on MEI and energy audits", d:"Know the obligation and who it bites.", url:"https://www.bca.gov.sg"},
+    {t:"BCA Building Energy Benchmarking Report", d:"Skim the charts to build intuition for EUI numbers."}
+  ],
+  review:[
+    {q:"What is the biggest technical energy lever in a commercial building, and why?", a:"Chiller plant efficiency \u2014 ACMV is typically 50\u201360% of total consumption, so plant efficiency moves the whole bill."},
+    {q:"What is MEI and what triggers it?", a:"Mandatory Energy Improvement: poor-performing buildings (identified via mandatory audits and annual energy submissions to BCA) must implement improvement measures."},
+    {q:"Recite 80-80-80 in 2030.", a:"80% of buildings (by GFA) green, 80% of new developments Super Low Energy, 80% improvement in energy efficiency for best-in-class buildings, by 2030."},
+    {q:"Advise a 25-year-old, poorly performing office building in three sentences.", a:"Regulatory exposure: MEI. Biggest lever: chiller plant retrofit. Target: Green Mark recertification \u2014 the retrofit typically pays back through energy savings while removing compliance risk and lifting asset value."}
+  ]},
+
+{ id:"s10", num:10, track:"cap", title:"Capstone: Integration & Case Study",
+  why:"Session 10 has no new content by design. Rebuild the map from memory, run one real development end-to-end through everything you have learned, and produce a one-page point-of-view memo you can reuse for interviews or a blog post.",
+  concepts:[
+    {t:"(30 min) Rebuild the whole map from memory", d:"Lifecycle chain, institutions, and each session's core framework on one A3 page, no notes. Then check against your Session 1 diagram."},
+    {t:"(45 min) One integrated case study", d:"Pick Punggol Digital District, Jurong Lake District or a large integrated development (e.g. Marina One). Trace: Master Plan designation \u2192 GLS/development \u2192 strata or lease structure (is there an MCST? who runs common areas?) \u2192 FM model (IFM? outcome-based? Smart FM?) \u2192 sustainability credentials."},
+    {t:"(30 min) Synthesis memo", d:"One page: \u2018Three shifts reshaping estate and facilities management in Singapore, and what they mean for transformation professionals.\u2019 Candidates: outcome-based contracting, Smart FM and aggregation, the sustainability ratchet."}
+  ],
+  resources:[
+    {t:"URA SPACE + developer/JTC pages + news", d:"Your case-study evidence base.", url:"https://www.ura.gov.sg/maps/"},
+    {t:"Your Session 1 map and fumble list", d:"The capstone review is cumulative \u2014 clear the fumble list before you finish."}
+  ],
+  review:[
+    {q:"What does GPR determine?", a:"Maximum development intensity: GPR \u00d7 land area = maximum gross floor area."},
+    {q:"Management fund vs sinking fund?", a:"Management fund: routine recurrent expenses. Sinking fund: capital and cyclical works."},
+    {q:"The four maintenance strategies?", a:"Corrective, preventive, condition-based, predictive."},
+    {q:"Input vs outcome-based contracts in one line?", a:"Input buys effort and frequency; outcome buys measured results with a performance regime."},
+    {q:"The two en bloc thresholds?", a:"80% (share value AND strata area) for developments 10+ years old; 90% if under 10 years."},
+    {q:"TOP vs CSC?", a:"TOP permits occupation when key requirements are met; CSC certifies full statutory completion."},
+    {q:"What is MEI?", a:"Mandatory Energy Improvement \u2014 poor-performing buildings must implement energy improvement measures."},
+    {q:"What does a CMMS do?", a:"Asset register, PM scheduling, work orders, fault reporting and history."},
+    {q:"What does share value drive?", a:"Contributions, voting rights, en bloc thresholds."},
+    {q:"The lifecycle chain, one more time.", a:"Plan \u2192 develop \u2192 own and govern \u2192 operate and maintain \u2192 renew. If you can hang any question on this chain, the 20 hours worked."}
+  ]}
+];
+
+/* ================= STATE ================= */
+const KEY = "gw-state-v1";
+let state = load();
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if (raw) return JSON.parse(raw);
+  }catch(e){ /* storage unavailable or corrupt: run in-memory */ }
+  return { concepts:{}, resources:{}, done:{}, fumbles:{} };
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ /* degrade gracefully */ }
+}
+function arrFor(map, id, len){
+  if (!map[id] || map[id].length !== len) map[id] = new Array(len).fill(false);
+  return map[id];
+}
+
+/* ================= NAV ================= */
+let currentId = null;
+let currentTab = "learn";
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+function goHome(){ stopTimer(); currentId = null; renderHome(); show("screen-home"); window.scrollTo(0,0); }
+
+function sess(id){ return SESSIONS.find(s => s.id === id); }
+function zc(s){ return TRACKS[s.track].c; }
+
+/* ================= HOME ================= */
+function renderHome(){
+  const el = document.getElementById("home-scroll");
+  const doneCount = SESSIONS.filter(s => state.done[s.id]).length;
+  let h = "";
+  h += '<div class="legend">' + SESSIONS.map(s =>
+      '<div class="seg' + (state.done[s.id] ? " done" : "") + '" style="--seg-c:' + zc(s) + '"></div>'
+    ).join("") + "</div>";
+  h += '<div class="progress-caption">' + doneCount + ' / 10 sheets complete</div>';
+
+  const fumbleIds = Object.keys(state.fumbles).filter(k => state.fumbles[k]);
+  if (fumbleIds.length){
+    h += '<div class="fumblecard"><div class="t">Fumble list: ' + fumbleIds.length + ' card' + (fumbleIds.length>1?"s":"") + '</div>' +
+         '<div class="d">Concepts you could not retrieve cleanly. Clear them before your next session.</div>' +
+         '<button class="btn btn-warn" onclick="startFumbleReview()">Review fumbles</button></div>';
+  }
+
+  h += SESSIONS.map(s => {
+    const done = !!state.done[s.id];
+    const c = arrFor(state.concepts, s.id, s.concepts.length).filter(Boolean).length;
+    return '<button class="sessionrow" style="--zc:' + zc(s) + '" onclick="openSession(\'' + s.id + '\')">' +
+      '<span class="zbar"></span>' +
+      '<span class="body">' +
+        '<span class="eyebrow">Sheet ' + String(s.num).padStart(2,"0") + ' · ' + TRACKS[s.track].name + '</span>' +
+        '<div class="t">' + s.title + '</div>' +
+        '<div class="meta">' + (done ? 'Completed ' + state.done[s.id] : c + '/' + s.concepts.length + ' concepts · ' + s.review.length + ' review cards') + '</div>' +
+      '</span>' +
+      '<span class="status' + (done ? " done" : "") + '">' + (done ? "\u2713" : "\u203A") + '</span>' +
+    '</button>';
+  }).join("");
+  el.innerHTML = h;
+}
+
+/* ================= SESSION ================= */
+function openSession(id){
+  currentId = id; currentTab = "learn";
+  const s = sess(id);
+  document.getElementById("sess-title").textContent = s.title;
+  document.getElementById("sess-sheet").textContent = "Sheet " + String(s.num).padStart(2,"0") + "/10";
+  document.getElementById("sess-tabs").style.setProperty("--zc", zc(s));
+  show("screen-session");
+  renderTab();
+}
+function setTab(t){ if (!currentId) return; stopTimer(); currentTab = t; renderTab(); }
+function renderTab(){
+  const s = sess(currentId);
+  ["learn","res","review"].forEach(t => {
+    const b = document.getElementById("tab-" + t);
+    b.classList.toggle("active", t === currentTab);
+    b.style.setProperty("--zc", zc(s));
+  });
+  const el = document.getElementById("sess-scroll");
+  el.style.setProperty("--zc", zc(s));
+  if (currentTab === "learn") el.innerHTML = renderLearn(s);
+  else if (currentTab === "res") el.innerHTML = renderRes(s);
+  else el.innerHTML = renderReviewIntro(s);
+  el.scrollTop = 0;
+  updateDoneBtn();
+}
+function renderLearn(s){
+  const checks = arrFor(state.concepts, s.id, s.concepts.length);
+  let h = '<div class="whybox"><div class="lbl">Why this session</div>' + s.why + '</div>';
+  h += '<div class="sectionlbl">Core concepts \u2014 tick as you master each</div>';
+  h += s.concepts.map((c,i) =>
+    '<div class="item' + (checks[i] ? " checked" : "") + '" style="--zc:' + zc(s) + '">' +
+      '<button class="box" aria-label="mark concept" onclick="toggleConcept(' + i + ')">' + (checks[i] ? "\u2713" : "") + '</button>' +
+      '<span class="txt"><div class="t">' + c.t + '</div><div class="d">' + c.d + '</div></span>' +
+    '</div>').join("");
+  return h;
+}
+function renderRes(s){
+  const checks = arrFor(state.resources, s.id, s.resources.length);
+  let h = '<div class="sectionlbl">Resources \u2014 tick when read or done</div>';
+  h += s.resources.map((r,i) =>
+    '<div class="item' + (checks[i] ? " checked" : "") + '" style="--zc:' + zc(s) + '">' +
+      '<button class="box" aria-label="mark resource" onclick="toggleResource(' + i + ')">' + (checks[i] ? "\u2713" : "") + '</button>' +
+      '<span class="txt"><div class="t">' + r.t + '</div><div class="d">' + r.d +
+      (r.url ? ' <a href="' + r.url + '" target="_blank" rel="noopener">Open \u2197</a>' : "") +
+      '</div></span></div>').join("");
+  h += '<div class="sectionlbl">Note</div><div class="item"><span class="txt"><div class="d">Links need a connection; everything else in this app works offline.</div></span></div>';
+  return h;
+}
+function toggleConcept(i){
+  const a = arrFor(state.concepts, currentId, sess(currentId).concepts.length);
+  a[i] = !a[i]; save(); renderTab();
+}
+function toggleResource(i){
+  const a = arrFor(state.resources, currentId, sess(currentId).resources.length);
+  a[i] = !a[i]; save(); renderTab();
+}
+function toggleDone(){
+  if (state.done[currentId]) delete state.done[currentId];
+  else state.done[currentId] = today();
+  save(); updateDoneBtn();
+}
+function updateDoneBtn(){
+  const b = document.getElementById("btn-done");
+  if (!currentId) return;
+  b.onclick = toggleDone; // M13: reset explicitly on screen entry (fumble mode repurposes this button)
+  if (state.done[currentId]){
+    b.textContent = "\u2713 Completed " + state.done[currentId] + " \u2014 tap to undo";
+    b.className = "btn btn-ok";
+  } else {
+    b.textContent = "Mark session complete";
+    b.className = "btn btn-ghost";
+  }
+}
+
+/* ================= REVIEW (timer + flashcards) ================= */
+let timerLeft = 15*60, timerRunning = false, timerHandle = null;
+function fmtTime(s){ return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0"); }
+function renderTimer(){
+  const t = document.getElementById("timer-display");
+  if (t) t.textContent = fmtTime(timerLeft);
+  const box = document.getElementById("timer-box");
+  if (box) box.classList.toggle("zero", timerLeft === 0);
+  const sp = document.getElementById("timer-start");
+  if (sp) sp.textContent = timerRunning ? "Pause" : (timerLeft === 15*60 ? "Start" : "Resume");
+}
+function timerToggle(){
+  if (timerRunning){ stopTimer(); }
+  else {
+    timerRunning = true;
+    timerHandle = setInterval(() => {
+      if (timerLeft > 0) timerLeft--;
+      if (timerLeft === 0) stopTimer();
+      renderTimer();
+    }, 1000);
+  }
+  renderTimer();
+}
+function stopTimer(){ timerRunning = false; if (timerHandle){ clearInterval(timerHandle); timerHandle = null; } }
+function timerReset(){ stopTimer(); timerLeft = 15*60; renderTimer(); }
+
+let deck = [], deckPos = 0, revealed = false, deckMode = "session";
+function renderReviewIntro(s){
+  timerLeft = 15*60; timerRunning = false;
+  return '' +
+  '<div class="timerbox" id="timer-box">' +
+    '<div><div class="lbl">15-min review</div><div class="time" id="timer-display">15:00</div></div>' +
+    '<div class="tbtns"><button id="timer-start" onclick="timerToggle()">Start</button>' +
+    '<button onclick="timerReset()">Reset</button></div>' +
+  '</div>' +
+  '<div class="sectionlbl">Active recall \u2014 answer out loud before revealing</div>' +
+  '<div class="reviewdone"><div class="big">' + s.review.length + '</div>' +
+  '<div class="sub">cards for this session. Retrieval first: attempt each answer from memory, then reveal and be honest about fumbles.</div>' +
+  '<button class="btn btn-ink" onclick="startSessionReview()">Begin review</button></div>' +
+  '<div id="flash-area"></div>';
+}
+function startSessionReview(){
+  const s = sess(currentId);
+  deck = s.review.map((c,i) => ({ q:c.q, a:c.a, key: s.id + "-" + i, zc: zc(s) }));
+  deckMode = "session"; deckPos = 0; revealed = false;
+  renderCard();
+}
+function startFumbleReview(){
+  deck = [];
+  SESSIONS.forEach(s => s.review.forEach((c,i) => {
+    const key = s.id + "-" + i;
+    if (state.fumbles[key]) deck.push({ q:c.q, a:c.a, key:key, zc: zc(s) });
+  }));
+  if (!deck.length) return;
+  // reuse the session screen shell for the fumble run
+  currentId = null; deckMode = "fumble"; deckPos = 0; revealed = false;
+  document.getElementById("sess-title").textContent = "Fumble review";
+  document.getElementById("sess-sheet").textContent = deck.length + " cards";
+  show("screen-session");
+  ["learn","res","review"].forEach(t => document.getElementById("tab-" + t).classList.remove("active"));
+  document.getElementById("tab-review").classList.add("active");
+  const b = document.getElementById("btn-done");
+  b.textContent = "Back to home"; b.className = "btn btn-ghost"; b.onclick = goHome;
+  renderCard();
+}
+function renderCard(){
+  const el = document.getElementById(deckMode === "fumble" ? "sess-scroll" : "flash-area");
+  if (deckMode === "fumble") document.getElementById("sess-scroll").innerHTML = "";
+  if (deckPos >= deck.length){ renderDeckDone(el); return; }
+  const c = deck[deckPos];
+  let h = '<div class="cardcount">Card ' + (deckPos+1) + ' of ' + deck.length + '</div>';
+  h += '<div class="flashcard" style="--zc:' + c.zc + '"><div class="q">' + c.q + '</div>';
+  if (revealed) h += '<div class="a">' + c.a + '</div>';
+  h += '</div>';
+  if (!revealed){
+    h += '<div class="flashrow"><button class="btn btn-ink" onclick="revealCard()">Show answer</button></div>';
+  } else {
+    h += '<div class="flashrow">' +
+         '<button class="btn btn-ok" onclick="answerCard(true)">Got it</button>' +
+         '<button class="btn btn-warn" onclick="answerCard(false)">Fumbled</button></div>';
+  }
+  el.innerHTML = h;
+  if (deckMode === "session"){
+    el.scrollIntoView({ block: "nearest" });
+  }
+}
+function revealCard(){ revealed = true; renderCard(); }
+function answerCard(gotIt){
+  const c = deck[deckPos];
+  if (gotIt) delete state.fumbles[c.key];
+  else state.fumbles[c.key] = true;
+  save();
+  deckPos++; revealed = false;
+  renderCard();
+}
+function renderDeckDone(el){
+  const fumbled = deck.filter(c => state.fumbles[c.key]).length;
+  let h = '<div class="reviewdone" style="margin-top:14px;">' +
+    '<div class="big">' + (deck.length - fumbled) + '/' + deck.length + '</div>' +
+    '<div class="sub">' + (fumbled === 0
+      ? "Clean sweep. Retrieval held \u2014 this session is consolidating."
+      : fumbled + " card" + (fumbled>1?"s":"") + " added to the fumble list. Retest at the start of your next session.") + '</div>';
+  if (deckMode === "session"){
+    h += '<button class="btn btn-ink" onclick="startSessionReview()">Run again</button>';
+  } else {
+    h += '<button class="btn btn-ink" onclick="goHome()">Done</button>';
+  }
+  h += '</div>';
+  el.innerHTML = h;
+}
+
+/* ================= INIT ================= */
+renderHome();
+</script>
+</body>
+</html>
