@@ -2,6 +2,8 @@
 
 A single-file, offline-first study companion for the 20-hour / 10-session plan on Singapore estate management, facilities management & maintenance, strata, and master planning.
 
+**v2 (19 Jul 2026)** — re-pitched from Singapore-property level to civil-service level: how a government department gets, funds, builds and runs its own estate. Two new sessions on the IBC (integrated building contractor) relationship, a procurement session, strata compressed into part of Session 10. Resources rewritten with exact navigation paths, time estimates, what-to-look-for lists and a "after this you can" test. State key bumped to `gw-state-v2`; SW cache `groundwork-20260719b`.
+
 ## What it does
 - **10 "sheets" (sessions)**, each with three tabs:
   - **Learn** — the why-this-session framing plus core concepts, each tickable as you master it
@@ -27,4 +29,3 @@ A single-file, offline-first study companion for the 20-hour / 10-session plan o
 
 ## Resetting progress
 DevTools console → `localStorage.removeItem('gw-state-v1')` → reload. (A settings screen wasn't worth the weight for a personal app; say the word if you want one.)
-# fmm-and-estate-study-
