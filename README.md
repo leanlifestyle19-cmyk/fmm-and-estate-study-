@@ -2,6 +2,8 @@
 
 A single-file, offline-first study companion for the 20-hour / 10-session plan on Singapore estate management, facilities management & maintenance, strata, and master planning.
 
+**v3 (19 Jul 2026)** — resources restructured on adult-learning principles (Knowles/Merrill): every resource is now a five-part activity — **Prime** (prediction/recall before opening the source), **Where** (navigation), **Do** (judgment tasks, not reading), **Produce** (a named artefact; 47 across the plan), **Check yourself** (success criteria). Sessions gained observable **objectives** (Learn tab) and a **This week at work** transfer commitment (Resources tab). Tick rule changed: a resource is done when its artefact exists, not when the page has been read. Resource counts per session unchanged, so `gw-state-v2` progress carries over. SW cache `groundwork-20260719c`.
+
 **v2 (19 Jul 2026)** — re-pitched from Singapore-property level to civil-service level: how a government department gets, funds, builds and runs its own estate. Two new sessions on the IBC (integrated building contractor) relationship, a procurement session, strata compressed into part of Session 10. Resources rewritten with exact navigation paths, time estimates, what-to-look-for lists and a "after this you can" test. State key bumped to `gw-state-v2`; SW cache `groundwork-20260719b`.
 
 ## What it does
@@ -25,7 +27,7 @@ A single-file, offline-first study companion for the 20-hour / 10-session plan o
 
 ## Conventions notes
 - Follows Master AAR M1–M20: SW registered first line (M3), individual cache puts (M4), navigate-by-mode (M5), `localDateStr()` for all dates (M6), `min-height:0` on scroll areas (M8), action button in a sticky footer outside scroll content (M9), core button handler reset explicitly on screen entry (M13).
-- **One deliberate deviation:** progress state uses `localStorage` (single JSON key `gw-state-v1`, ~2 KB) instead of IndexedDB — all study content is embedded in the file, so there is no dataset to store. Reads/writes are wrapped in try/catch and the app degrades to in-memory if storage is unavailable. Easy to swap to the guarded IDB pattern if you extend it (e.g. per-day study logs).
+- **One deliberate deviation:** progress state uses `localStorage` (single JSON key `gw-state-v2`, ~2 KB) instead of IndexedDB — all study content is embedded in the file, so there is no dataset to store. Reads/writes are wrapped in try/catch and the app degrades to in-memory if storage is unavailable. Easy to swap to the guarded IDB pattern if you extend it (e.g. per-day study logs).
 
 ## Resetting progress
-DevTools console → `localStorage.removeItem('gw-state-v1')` → reload. (A settings screen wasn't worth the weight for a personal app; say the word if you want one.)
+DevTools console → `localStorage.removeItem('gw-state-v2')` → reload. (A settings screen wasn't worth the weight for a personal app; say the word if you want one.)
