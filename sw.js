@@ -1,4 +1,4 @@
-const CACHE = 'groundwork-20260719'; // M1: BUMP on EVERY index.html deploy.
+const CACHE = 'groundwork-20260719b'; // M1: BUMP on EVERY index.html deploy.
 
 // M16: list EVERY external API host here. (No APIs in this app; external
 // resource links open in the browser and are not intercepted.)
